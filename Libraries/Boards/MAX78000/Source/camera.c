@@ -333,6 +333,11 @@ int camera_reset(void)
     return camera.reset();
 }
 
+int camera_sleep(int enable)
+{
+    return camera.sleep(enable);
+}
+
 int camera_setup(int xres, int yres, pixformat_t pixformat, fifomode_t fifo_mode, dmamode_t dma_mode, int dma_channel)
 {
     int ret = STATUS_OK;
@@ -342,12 +347,15 @@ int camera_setup(int xres, int yres, pixformat_t pixformat, fifomode_t fifo_mode
     g_fifo_mode = fifo_mode;
 
     switch (g_fifo_mode) {
-    case FIFO_THREE_BYTE:
-        MXC_PCIF->ctrl |= MXC_F_CAMERAIF_CTRL_THREE_CH_EN;
+    case FIFO_THREE_BYTE: // data is 3 bytes in FIFO, it will be converted to 32-bit with MSB set to zero
+        MXC_PCIF->ctrl |= MXC_F_CAMERAIF_CTRL_THREE_CH_EN;  // CNN mode enabled
         break;
 
-    case FIFO_FOUR_BYTE:
-        MXC_PCIF->ctrl &= ~MXC_F_CAMERAIF_CTRL_THREE_CH_EN;
+    case FIFO_FOUR_BYTE: // data is 4 bytes in FIFO, no need to convert to 32-bit
+        MXC_PCIF->ctrl &= ~MXC_F_CAMERAIF_CTRL_THREE_CH_EN; // CNN mode disabled
+
+        if (pixformat == PIXFORMAT_RGB888)  // cannot be 4 bytes in FIFO in RGB888 case
+        	return -1;
         break;
 
     default:
@@ -552,7 +560,7 @@ void camera_get_image(uint8_t** img, uint32_t* imgLen, uint32_t* w, uint32_t* h)
     int n = 0, index;
     MXC_PCIF->int_fl |= MXC_PCIF->int_fl;
 
-    if (g_dma_mode == USE_DMA && g_pixel_format == PIXFORMAT_RGB888) {
+/*    if (g_dma_mode == USE_DMA && g_pixel_format == PIXFORMAT_RGB888) {
         // Filter image data
         index = 4;
 
@@ -566,7 +574,7 @@ void camera_get_image(uint8_t** img, uint32_t* imgLen, uint32_t* w, uint32_t* h)
             rx_data[n] = rx_data[index - 1];
         }
     }
-
+*/
     *img    = (uint8_t*)rx_data;
     *imgLen = g_total_img_size;
 

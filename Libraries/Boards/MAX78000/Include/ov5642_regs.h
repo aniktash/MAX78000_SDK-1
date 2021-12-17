@@ -95,7 +95,7 @@
 #define FORMAT_RGB444      0x97
 #define FORMAT_RGB555      0x71
 #define FORMAT_RAW         0xF8
-
+#define FORMAT_BGR888      0x24
 // Special effects
 typedef enum {
     NORMAL = 0,
