@@ -55,6 +55,14 @@ BOARD=EvKit_V1
 #BOARD=FTHR_RevA
 endif
 
+# Enable the connected camera
+ifeq "$(CAMERA)" ""
+#CAMERA=OV7692
+CAMERA=OV5642
+#CAMERA=HM01B0
+#CAMERA=HM0360
+endif
+
 # This is the path to the CMSIS root directory
 ifeq "$(MAXIM_PATH)" ""
 LIBS_DIR=../../../../Libraries

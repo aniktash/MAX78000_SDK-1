@@ -45,6 +45,8 @@
 #include "sccb.h"
 #include "dma_regs.h"
 
+
+
 /*******************************      DEFINES      ***************************/
 #define FIFO_THRES_HOLD         (4)
 #define PCIF_DATA_BUS_WITH      MXC_S_CAMERAIF_CTRL_DATA_WIDTH_8BIT
@@ -557,7 +559,7 @@ uint8_t* camera_get_pixel_format(void)
 
 void camera_get_image(uint8_t** img, uint32_t* imgLen, uint32_t* w, uint32_t* h)
 {
-    int n = 0, index;
+   // int n = 0, index;
     MXC_PCIF->int_fl |= MXC_PCIF->int_fl;
 
 /*    if (g_dma_mode == USE_DMA && g_pixel_format == PIXFORMAT_RGB888) {

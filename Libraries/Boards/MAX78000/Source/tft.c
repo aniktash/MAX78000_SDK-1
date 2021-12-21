@@ -887,6 +887,7 @@ int MXC_TFT_Init(mxc_spi_regs_t* tft_spi, int ss_idx, mxc_gpio_cfg_t* reset_ctrl
     // Turn on backlight
     MXC_TFT_Backlight(1);
 
+	printf(" \n");
     return result;
 }
 

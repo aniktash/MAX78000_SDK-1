@@ -100,6 +100,14 @@ IPATH += ../Common
 IPATH += ./Camera/include
 IPATH += TFT/evkit/
 
+# Enable the connected camera
+ifeq "$(CAMERA)" ""
+#CAMERA=OV7692
+CAMERA=OV5642
+#CAMERA=HM01B0
+#CAMERA=HM0360
+endif
+
 # Enable assertion checking for development
 PROJ_CFLAGS+=-DMXC_ASSERT_ENABLE
 

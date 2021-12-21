@@ -506,9 +506,33 @@ int main(void)
 
 #if !defined(USE_SAMPLEDATA) && !defined(USE_SPIDATA)
   int dma_channel;
+  int slaveAddress;
+  int ret = 0;
+  int id;
+
   // Initialize camera.
   printf("Init Camera.\n");
   camera_init(CAMERA_FREQ);
+
+  slaveAddress = camera_get_slave_address();
+      printf("Camera I2C slave address: %02x\n", slaveAddress);
+
+  // Obtain the manufacturer ID of the camera.
+  ret = camera_get_manufacture_id(&id);
+
+  if (ret != STATUS_OK) {
+	  printf("Error returned from reading camera id. Error %d\n", ret);
+	  return -1;
+  }
+
+  printf("Camera ID detected: %04x\n", id);
+
+  #if defined(CAMERA_HM01B0) || defined(CAMERA_HM0360) || defined(CAMERA_OV5642)
+      camera_set_hmirror(0);
+      camera_set_vflip(0);
+  #endif
+
+
 
   // Initialize DMA for camera interface
   MXC_DMA_Init();

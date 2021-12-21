@@ -52,7 +52,7 @@ BOARD=EvKit_V1
 endif
 ```
 
-To compile code for MAX78000 Feather board enable **BOARD=FTHR_RevA** in Makefile (requires TFT display for Featherhttps://github.com/MaximIntegratedAI/MaximAI_Documentation/tree/master/MAX78000_Feather):
+To compile code for MAX78000 Feather board enable **BOARD=FTHR_RevA** in Makefile (requires TFT display for Feather https://github.com/MaximIntegratedAI/MaximAI_Documentation/tree/master/MAX78000_Feather):
 
 ```bash
 # Specify the board used
@@ -61,6 +61,14 @@ ifeq "$(BOARD)" ""
 BOARD=FTHR_RevA
 endif
 ```
+
+**Note: If you are using Eclipse, please also make sure to change the value of Board environment variable to "FTHR_RevA by:**
+
+*right click project name > Properties > C/C++ Build > Environment > Board"*
+
+<img src="Resources/eclipse_board.png" style="zoom:33%;" />
+
+
 
 ### Load firmware image to MAX78000 EVKIT or Feather Board
 
