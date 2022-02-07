@@ -48,6 +48,11 @@
 #include "led.h"
 
 
+#include "pt.h"
+#include "gcr_regs.h"
+#include "pt_reva_regs.h"
+#include "ptg_reva_regs.h"
+#include "pt_reva.h"
 
 /*******************************      DEFINES      ***************************/
 #define FIFO_THRES_HOLD         (4)
@@ -286,6 +291,31 @@ static void setup_dma(void)
     MXC_DMA->inten |= (1 << g_dma_channel);
 }
 
+
+void ContinuousPulseTrain(int ch)
+{
+    //Setup GPIO to PT output function
+    //GPIO P0.18 uses PT0
+
+    //setup PT configuration
+    mxc_pt_cfg_t ptConfig;
+    ptConfig.channel = ch;                  //PT0
+    ptConfig.bps = 2*1000000*25;             //bit rate
+    ptConfig.ptLength = 0;                          //bits
+    ptConfig.pattern = 0x49249240;//0x49249249;// 0x33333333;//0xF0F0F0F0;//0xFFFF0000;//0xCCCCCCCC;//0xDB68B6D6;//
+    ptConfig.loop = 0;                              //continuous loop
+    ptConfig.loopDelay = 0;
+
+    MXC_PT_Config(&ptConfig);
+
+    if(ch) {
+    	MXC_PT_Start(MXC_F_PTG_ENABLE_PT1);
+    }
+    else {
+    MXC_PT_Start(MXC_F_PTG_ENABLE_PT0);
+}
+}
+
 /******************************** Public Functions ***************************/
 int camera_init(uint32_t freq)
 {
@@ -304,7 +334,7 @@ int camera_init(uint32_t freq)
     // continuous pulse train mode.
     pt_cfg.channel = 0;
     pt_cfg.bps = freq * 2;
-    pt_cfg.pattern = 0x55555555;
+    pt_cfg.pattern =0x55555555;
     pt_cfg.ptLength = 0;
     pt_cfg.loop = (((freq / 1000) * CAMERA_STARTUP_DELAY) + 15) / 16;
     pt_cfg.loopDelay = 0;
@@ -315,10 +345,13 @@ int camera_init(uint32_t freq)
 
     // Camera requires a delay after starting its input clock.
     while (MXC_PT_IsActive(1));
-
+#if 0
     MXC_PT_SqrWaveConfig(0, freq);
     MXC_PT_Start(MXC_F_PTG_ENABLE_PT0);
+#else
 
+    ContinuousPulseTrain(0);
+#endif
     MXC_PCIF->ctrl |= 0;
     // Initialize serial camera communication bus.
     sccb_init();
