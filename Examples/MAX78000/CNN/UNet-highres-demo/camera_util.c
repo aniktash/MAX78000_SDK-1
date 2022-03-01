@@ -69,7 +69,6 @@ static uint32_t * data_addr6 = (uint32_t *) 0x50810700;
 static uint32_t * data_addr9 = (uint32_t *) 0x50c08700;
 //static uint32_t * data_addr10 = (uint32_t *) 0x50c10700;
 //static uint32_t * data_addr11 = (uint32_t *) 0x50c18700;
-uint8_t ur, ug, ub;
 
 static uint32_t  *addr, offset0, offset1, subtract;
 
@@ -148,166 +147,141 @@ int initialize_camera(void)
 
 void load_row_cnn_init(void)
 {
-		data_addr0 = (uint32_t *) 0x50400700;
-		data_addr3 = (uint32_t *) 0x50418700;
-		data_addr6 = (uint32_t *) 0x50810700;
-		data_addr9 = (uint32_t *) 0x50c08700;
-		addr = data_addr9;
+    data_addr0 = (uint32_t *) 0x50400700;
+    data_addr3 = (uint32_t *) 0x50418700;
+    data_addr6 = (uint32_t *) 0x50810700;
+    data_addr9 = (uint32_t *) 0x50c08700;
+    addr = data_addr9;
 }
 
-
-uint32_t m;
 void load_row_cnn(uint8_t *data, int row)
 {
-	uint8_t *dataptr;
-	dataptr = data;
+    union {
+        uint32_t w;
+        uint8_t b[4];
+    } m;
 
-	//LED_Toggle(LED1);
- // init
-	if ((row & 0x03) == 0)
-	{
-	   data_addr9 = addr;
-	   addr = data_addr0;
-	   offset0 = 0x2000;
-	   offset1 = offset0;
-	   subtract = 0x4000 - 1;
-	}
-	else if ((row & 0x03) == 1)
-	{
-		data_addr0 = addr;
-		addr = data_addr3;
-		offset0 = 0xFA000;
-		offset1 = 0x2000;
-		subtract = 0xFC000 - 1;
-	}
-	else if ((row & 0x03) == 2)
-	{
-		data_addr3 = addr;
-		addr = data_addr6;
-		offset0 = 0x2000;
-		offset1 = 0xFA000;
-		subtract = 0xFC000 - 1;
-	}
-	else// if ((row & 0x03) == 3)
-	{
-		data_addr6 = addr;
-		addr = data_addr9;
-		offset0 = 0x2000;
-		offset1 = 0x2000;
-		subtract = 0x4000 - 1;
-	}
+#ifdef RGB565
+    uint16_t *dataptr = (uint16_t *)data;
+#else
+    uint8_t *dataptr = data;
+#endif
+
+    offset0 = 0x00002000;
+    offset1 = 0x00002000;
+    subtract = 0x00004000-1;
+
+    switch (row & 3) {
+        case 0:
+            data_addr9 = addr;
+            addr = data_addr0;
+            break;
+        case 1:
+            data_addr0 = addr;
+            addr = data_addr3;
+            offset0 += 0x000FA000-0x00002000;
+            subtract += 0x000FC000-0x00004000;
+            break;
+        case 2:
+            data_addr3 = addr;
+            addr = data_addr6;
+            offset1 += 0x000FA000-0x00002000;
+            subtract += 0x000FC000-0x00004000;
+            break;
+        default:
+            data_addr6 = addr;
+            addr = data_addr9;
+            break;
+    }
 
 	// indexes of 352x352 image (row,j)
-	for (int j = 0; j< IMAGE_XRES; j+=4)
+	for (int j = 0; j < IMAGE_XRES; j += 4)
 	{
+#if defined(PATTERN_GEN)
+        // static test pattern
+        m.b[0] = 133;           // r0
+        m.b[1] = j >> 1;        // g0
+        m.b[2] = row >> 1;      // b0
+        m.b[3] = 133;           // r1
 
-//0
-#ifdef PATTERN_GEN
-        ub = row >> 1;
-        ug = j >> 1;
-        ur = 133;
-#else
-
-#ifdef RGB565
-        ur = (uint8_t)((*dataptr) & 0xF8);
-		ug = (uint8_t)((*dataptr)<< 5);
-		dataptr++;
-		ug |= (uint8_t)((*dataptr & 0xE0) >> 3);
-		ub = (uint8_t)((*dataptr) << 3);
-		dataptr++;
-#else
-        ur = *dataptr++;
-		ug = *dataptr++;
-		ub = *dataptr++;
-		dataptr++; // skip MSB = 0x00
-#endif
-#endif
-		m = (uint8_t)((ur)) | (uint8_t)((ug)) << 8 | (uint8_t)((ub)) << 16;
-
-//1
-#ifdef PATTERN_GEN
-        ub = row >> 1;
-        ug = (j+1) >> 1;
-        ur = 133;
-#else
-
-#ifdef RGB565
-        ur = (uint8_t)((*dataptr) & 0xF8);
-		ug = (uint8_t)((*dataptr)<< 5);
-		dataptr++;
-		ug |= (uint8_t)((*dataptr & 0xE0) >> 3);
-		ub = (uint8_t)((*dataptr) << 3);
-		dataptr++;
-#else
-        ur = *dataptr++;
-		ug = *dataptr++;
-		ub = *dataptr++;
-		dataptr++; // skip MSB = 0x00
-#endif
-#endif
-
-		m = (m | (uint8_t)((ur)) << 24) ^ 0x80808080;
-
-        *addr = m;
+        *addr = m.w ^ 0x80808080U;
         addr += offset0;
 
-		m = (uint8_t)((ug)) | (uint8_t)((ub)) << 8;
+        m.b[0] = (j+1) >> 1;    // g1
+        m.b[1] = row >> 1;      // b1
+        m.b[2] = 133;           // r2
+        m.b[3] = (j+2) >> 1;    // g2
 
-//2
-#ifdef PATTERN_GEN
-        ub = row >> 1;
-        ug = (j+2) >> 1;
-        ur = 133;
-#else
-
-#ifdef RGB565
-        ur = (uint8_t)((*dataptr) & 0xF8);
-		ug = (uint8_t)((*dataptr)<< 5);
-		dataptr++;
-		ug |= (uint8_t)((*dataptr & 0xE0) >> 3);
-		ub = (uint8_t)((*dataptr) << 3);
-		dataptr++;
-#else
-        ur = *dataptr++;
-		ug = *dataptr++;
-		ub = *dataptr++;
-		dataptr++; // skip MSB = 0x00
-#endif
-#endif
-        m = (m | (uint8_t)((ur)) << 16 | (uint8_t)((ug)) << 24) ^ 0x80808080;
-
-        *addr = m;
+        *addr = m.w ^ 0x80808080U;
         addr += offset1;
 
-        m = (uint8_t)((ub));
+        m.b[0] = row >> 1;      // b2
+        m.b[1] = 133;           // r3
+        m.b[2] = (j+3) >> 1;    // g3
+        m.b[3] = row >> 1;      // b3
 
-//3
-#ifdef PATTERN_GEN
-        ub = row >> 1;
-        ug = (j+3) >> 1;
-        ur = 133;
+        *addr = m.w ^ 0x80808080U;
+        addr -= subtract;
+#elif defined(RGB565)
+        // RGB565 to packed 24-bit RGB
+        m.b[0] = (*dataptr & 0xF800) >> 11;
+        m.b[1] = (*dataptr & 0x07E0) >> 5;
+        m.b[2] = (*dataptr & 0x001F) << 3;
+        dataptr++;
+        m.b[3] = (*dataptr & 0xF800) >> 11;
+
+        *addr = m.w ^ 0x80808080U;
+        addr += offset0;
+
+        m.b[0] = (*dataptr & 0x07E0) >> 5;
+        m.b[1] = (*dataptr & 0x001F) << 3;
+        dataptr++;
+        m.b[2] = (*dataptr & 0xF800) >> 11;
+        m.b[3] = (*dataptr & 0x07E0) >> 5;
+
+        *addr = m.w ^ 0x80808080U;
+        addr += offset1;
+
+        m.b[0] = (*dataptr & 0x001F) << 3;
+        dataptr++;
+        m.b[1] = (*dataptr & 0xF800) >> 11;
+        m.b[2] = (*dataptr & 0x07E0) >> 5;
+        m.b[3] = (*dataptr & 0x001F) << 3;
+        dataptr++;
+
+        *addr = m.w ^ 0x80808080U;
+        addr -= subtract;
 #else
-#ifdef RGB565
-        ur = (uint8_t)((*dataptr) & 0xF8);
-		ug = (uint8_t)((*dataptr)<< 5);
-		dataptr++;
-		ug |= (uint8_t)((*dataptr & 0xE0) >> 3);
-		ub = (uint8_t)((*dataptr) << 3);
-		dataptr++;
-#else
-        ur = *dataptr++;
-		ug = *dataptr++;
-		ub = *dataptr++;
-		dataptr++; // skip MSB = 0x00
+        // unpacked 24-bit RGB to packed 24-bit RGB
+        m.b[0] = *dataptr++; // r0
+        m.b[1] = *dataptr++; // g0
+        m.b[2] = *dataptr++; // b0
+        dataptr++;           // skip MSB
+        m.b[3] = *dataptr++; // r1
+
+        *addr = m.w ^ 0x80808080U;
+        addr += offset0;
+
+        m.b[0] = *dataptr++; // g1
+        m.b[1] = *dataptr++; // b1
+        dataptr++;           // skip MSB
+        m.b[2] = *dataptr++; // r2
+        m.b[3] = *dataptr++; // g2
+
+        *addr = m.w ^ 0x80808080U;
+        addr += offset1;
+
+        m.b[0] = *dataptr++; // b2
+        dataptr++;           // skip MSB
+        m.b[1] = *dataptr++; // r3
+        m.b[2] = *dataptr++; // g3
+        m.b[3] = *dataptr++; // b3
+        dataptr++;           // skip MSB
+
+        *addr = m.w ^ 0x80808080U;
+        addr -= subtract;
 #endif
-#endif
-
-		m = (m | (uint8_t)((ur)) << 8 | (uint8_t)((ug)) << 16 | (uint8_t)((ub)) << 24) ^ 0x80808080;
-
- 		*addr = m;
- 		addr -= subtract;
-
-	}
+    }
 
 }
 
