@@ -345,7 +345,7 @@ int camera_init(uint32_t freq)
 
     // Camera requires a delay after starting its input clock.
     while (MXC_PT_IsActive(1));
-#if 0
+#if 1
     MXC_PT_SqrWaveConfig(0, freq);
     MXC_PT_Start(MXC_F_PTG_ENABLE_PT0);
 #else
