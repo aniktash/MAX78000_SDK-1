@@ -508,7 +508,8 @@ static void displayInit(void)
         // delay after reset
         MXC_Delay(1000);
     }
-
+	///
+	printf("Display initilization ...\r\n");
     write_command(0x0028);    // VCOM OTP
     write_data(0x0006);       // Page 55-56 of SSD2119 datasheet
 

@@ -435,7 +435,7 @@ void load_input_camera(void)
 
 }
 
-#define DIV 32   // Note 320%DIV should be 0 or you will see vertical lines between slices on TFT
+#define DIV 16//64  // Note 320%DIV should be 0 or you will see vertical lines between slices on TFT
 
 void display_camera(void)
 {

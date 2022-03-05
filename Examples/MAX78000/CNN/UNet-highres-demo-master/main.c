@@ -48,7 +48,7 @@
 //#include "sampleoutput.h"
 
 
-//#define USE_CAMERA   // if enabled, it uses the camera specified in the make file, otherwise it uses serial loader
+#define USE_CAMERA   // if enabled, it uses the camera specified in the make file, otherwise it uses serial loader
 
 
 //------------------------------------------------------------
@@ -399,14 +399,14 @@ int main(void)
 
 
 #if 1
-		 /// camera_sleep(0); // disable sleep
-		 /// camera_start_capture_image(); // next frame
+		 // camera_sleep(0); // disable sleep
+		 // camera_start_capture_image(); // next frame
 
 
 		  cnn_start(); // Start CNN processing
 
 
-		  ///display_camera();
+		 // display_camera();
 
 
 		  SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk; // SLEEPDEEP=0
