@@ -76,12 +76,9 @@ int MXC_PT_RevA_Config(mxc_ptg_reva_regs_t* ptg, mxc_pt_cfg_t *cfg)
     
     rate = (ptClock /(cfg->bps));
 	
-    printf("%d  %d  %d\n", rate, cfg->bps, ptClock);
+    //printf("%d  %d  %d\n", rate, cfg->bps, ptClock);
     if(cfg->bps > 1000000) {           //To lessen the delta between generated and expected clock
-       // rate += 2;
-	//rate += 1;
-		;
-		
+       rate += 2;	
     }
     printf("%d  %d  %d\n", rate, cfg->bps, ptClock);
     mxc_pt_reva_regs_t * temp = (mxc_pt_reva_regs_t*) MXC_PT_GET_PT(cfg->channel);
