@@ -41,7 +41,7 @@
 #include "uart.h"
 #include "led.h"
 #include "board.h"
-
+ 
 #include "camera.h"
 #include "dma.h"
 #include "camera_util.h"
@@ -556,6 +556,38 @@ void dump_cnn(void)
 
 }
 
+
+void dump_inference(void)
+{
+
+	uint32_t * data_addr[16] = {(uint32_t *) 0x50400000, (uint32_t *) 0x50408000, (uint32_t *) 0x50410000, (uint32_t *) 0x50418000,
+			                    (uint32_t *) 0x50800000, (uint32_t *) 0x50808000, (uint32_t *) 0x50810000, (uint32_t *) 0x50818000, 
+								(uint32_t *) 0x50c00000, (uint32_t *) 0x50c08000, (uint32_t *) 0x50c10000, (uint32_t *) 0x50c18000, 
+								(uint32_t *) 0x51000000, (uint32_t *) 0x51008000, (uint32_t *) 0x51010000, (uint32_t *) 0x51018000, 
+								};
+
+
+	printf("\nDUMPING INFERENCE, press PB0 \n");
+	while (!PB_Get(0));
+	for (int i=0; i<16; i++)
+	{
+		for (int j=0; j<7744; j+= 16)
+		{
+			printf("\n%08X: ",data_addr[i]);
+			for(int k=0; k<16; k++)
+			{
+				printf("%08X ", *data_addr[i]);
+				sum += *data_addr[i];
+				data_addr[i]++;
+			}
+		}
+		printf("\n");
+	}
+
+	printf("SUM: %08X \n", sum);
+	while(1);
+
+}
 
 void run_camera(void)
 {

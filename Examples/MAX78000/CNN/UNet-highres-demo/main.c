@@ -60,7 +60,7 @@
 
 volatile uint32_t cnn_time; // Stopwatch
 
-#define CON_BAUD 115200
+#define CON_BAUD 2*115200
 #define NUM_PIXELS 7744 // 88x88
 #define NUM_IN_CHANNLES 48
 #define NUM_OUT_CHANNLES 64
@@ -394,29 +394,33 @@ int main(void)
 
 
 #ifdef PATTERN_GEN
-		  dump_cnn();
+		 // dump_cnn();
 #endif
 
 
-#if 1
+		// start inference
+#ifdef USE_CAMERA
 		  camera_sleep(0); // disable sleep
 		  camera_start_capture_image(); // next frame
-
-
+#endif
 		  cnn_start(); // Start CNN processing
 
-
+#ifdef USE_CAMERA
 		  display_camera();
-
+#endif
 
 		  SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk; // SLEEPDEEP=0
 		  while (cnn_time == 0)
 			__WFI(); // Wait for CNN
 
-#endif
+
+		  /// unload
+		  //dump_inference();
+		  //send_output();
+#ifdef USE_CAMERA
 		  camera_sleep(0); // disable sleep
 		  camera_start_capture_image();
-
+#endif
 		  if (PB_Get(0))
 		  {
 		  	  #ifdef CNN_INFERENCE_TIMER

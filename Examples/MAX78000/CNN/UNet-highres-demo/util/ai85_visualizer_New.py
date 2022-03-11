@@ -16,7 +16,7 @@ from utils_fast_New import *
 
 
 ser = serial.Serial('COM54')
-ser.baudrate = 115200
+ser.baudrate = 2*115200
 ser.timeout = 0.001
 
 
@@ -76,8 +76,8 @@ folded_img = np.transpose(folded_img, (2, 0, 1))
 
 # send the folded image to device and save the received result to output_filename
 print(folded_img.min(), folded_img.max())
-send_image_receive_output(ser, folded_img, output_filename)
-#send_image_receive_output(ser, None, output_filename)
+#send_image_receive_output(ser, folded_img, output_filename)
+send_image_receive_output(ser, None, output_filename)
 
 # read from output_filename and create the predicted map
 colors = read_output_from_txtfile(output_filename)
@@ -88,9 +88,9 @@ colors = read_output_from_txtfile(output_filename)
 
 
 f, ax = plt.subplots(1, 3, figsize=(12, 4))
-ax[0].imshow(img_resize)
+ax[0].imshow(img_resize1)
 ax[1].imshow(colors)
-ax[2].imshow(img_resize)
+ax[2].imshow(img_resize1)
 ax[2].imshow(colors, alpha=0.2)
 plt.show() 
 

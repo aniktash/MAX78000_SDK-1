@@ -75,7 +75,7 @@
 #define TFT_H	240
 
 
-//#define PATTERN_GEN
+#define PATTERN_GEN
 
 
 
