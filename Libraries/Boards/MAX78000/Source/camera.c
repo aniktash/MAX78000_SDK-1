@@ -174,7 +174,7 @@ void __attribute__((interrupt("machine")))  DMA0_IRQHandler(void)
 static stream_stat_t statistic;
 static volatile uint32_t current_stream_buffer = 0;
 static uint8_t* stream_buffer_ptr = NULL;
-
+/*
 static void stream_callback(int a, int b)
 {
     if (MXC_DMA->ch[g_dma_channel].status & MXC_F_DMA_STATUS_CTZ_IF) {
@@ -200,8 +200,8 @@ static void stream_callback(int a, int b)
         statistic.dma_transfer_count++;
     }
 }
-
-static void stream_callback_orig(int a, int b)
+*/
+static void stream_callback(int a, int b)
 {
     if (MXC_DMA->ch[g_dma_channel].status & MXC_F_DMA_STATUS_CTZ_IF) {
         MXC_DMA->ch[g_dma_channel].status = MXC_F_DMA_STATUS_CTZ_IF; // Clear CTZ status flag
@@ -473,7 +473,8 @@ int camera_setup(int xres, int yres, pixformat_t pixformat, fifomode_t fifo_mode
         rx_data = (uint8_t*)malloc(2 * g_stream_buffer_size);
 
         // Register streaming callback function
-        MXC_DMA_SetCallback(g_dma_channel, stream_callback);
+        MXC_DMA_SetCallback(dma_channel, stream_callback);
+        ///MXC_DMA_SetCallback(g_dma_channel, stream_callback);
 
 #ifndef __riscv
         NVIC_SetVector(DMA0_IRQn, stream_irq_handler);

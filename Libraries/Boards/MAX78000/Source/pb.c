@@ -76,10 +76,10 @@ int PB_RegisterCallback(unsigned int pb, pb_callback callback)
 }
 
 //******************************************************************************
-void GPIO0_IRQHandler(void)
+/*void GPIO0_IRQHandler(void)
 {
     MXC_GPIO_Handler(MXC_GPIO_GET_IDX(MXC_GPIO0));
-}
+}*/ /// for qspi host testing
 void GPIO1_IRQHandler(void)
 {
     MXC_GPIO_Handler(MXC_GPIO_GET_IDX(MXC_GPIO1));
