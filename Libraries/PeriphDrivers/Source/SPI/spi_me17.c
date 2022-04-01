@@ -71,6 +71,7 @@ int MXC_SPI_Init(mxc_spi_regs_t* spi, int masterMode, int quadModeUsed, int numS
     
     mxc_gpio_cfg_t gpio_cfg_spi;
     gpio_cfg_spi.pad = MXC_GPIO_PAD_NONE;
+//    gpio_cfg_spi.pad = MXC_GPIO_PAD_PULL_DOWN;
     gpio_cfg_spi.port = MXC_GPIO0;
 
     // Set VDDIO level
@@ -157,22 +158,32 @@ int MXC_SPI_Init(mxc_spi_regs_t* spi, int masterMode, int quadModeUsed, int numS
         // check rest of the pins
         if (pins.clock) {
             gpio_cfg_spi.mask |= MXC_GPIO_PIN_7;
+            //gpio_cfg_spi.port->ds0 |= MXC_GPIO_PIN_7 ; //RA
+            //gpio_cfg_spi.port->ds1 |= MXC_GPIO_PIN_7 ; //RA
         }
         
         if (pins.miso) {
             gpio_cfg_spi.mask |= MXC_GPIO_PIN_6;
+            //gpio_cfg_spi.port->ds0 |= MXC_GPIO_PIN_6 ; //RA
+            gpio_cfg_spi.port->ds1 |= MXC_GPIO_PIN_6 ; //RA
         }
         
         if (pins.mosi) {
             gpio_cfg_spi.mask |= MXC_GPIO_PIN_5;
+            //gpio_cfg_spi.port->ds0 |= MXC_GPIO_PIN_5 ; //RA
+            gpio_cfg_spi.port->ds1 |= MXC_GPIO_PIN_5 ; //RA
         }
         
         if (pins.sdio2) {
             gpio_cfg_spi.mask |= MXC_GPIO_PIN_8;
+            //gpio_cfg_spi.port->ds0 |= MXC_GPIO_PIN_8 ; //RA
+            gpio_cfg_spi.port->ds1 |= MXC_GPIO_PIN_8 ; //RA
         }
         
         if (pins.sdio3) {
             gpio_cfg_spi.mask |= MXC_GPIO_PIN_9;
+            //gpio_cfg_spi.port->ds0 |= MXC_GPIO_PIN_9 ; //RA
+            gpio_cfg_spi.port->ds1 |= MXC_GPIO_PIN_9 ; //RA
         }
         
         if (pins.ss0) {

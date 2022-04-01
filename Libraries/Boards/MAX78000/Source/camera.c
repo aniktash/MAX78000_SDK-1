@@ -201,6 +201,7 @@ static void stream_callback(int a, int b)
     }
 }
 */
+
 static void stream_callback(int a, int b)
 {
     if (MXC_DMA->ch[g_dma_channel].status & MXC_F_DMA_STATUS_CTZ_IF) {
@@ -477,7 +478,27 @@ int camera_setup(int xres, int yres, pixformat_t pixformat, fifomode_t fifo_mode
         ///MXC_DMA_SetCallback(g_dma_channel, stream_callback);
 
 #ifndef __riscv
-        NVIC_SetVector(DMA0_IRQn, stream_irq_handler);
+        //NVIC_SetVector(DMA0_IRQn, stream_irq_handler);
+        switch(dma_channel)
+        {
+        	case 0:
+        		 NVIC_SetVector(DMA0_IRQn, stream_irq_handler);
+        		 break;
+        	case 1:
+        	     NVIC_SetVector(DMA1_IRQn, stream_irq_handler);
+        	     break;
+        	case 2:
+        	     NVIC_SetVector(DMA2_IRQn, stream_irq_handler);
+        	     break;
+        	case 3:
+        	     NVIC_SetVector(DMA3_IRQn, stream_irq_handler);
+        	     break;
+        	default:
+        		printf("DMA channel not supported!\n");
+        		while(1);
+
+        }
+
 #else
         NVIC_EnableIRQ(DMA0_IRQn);
 #endif
