@@ -1,2 +1,2 @@
-#TargetFrameworkVersion=v4.0:PlatformToolSet=v141:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=10.0.17134.0
-Release|Win32|G:\MAX78000_SDK_1-Afs\Examples\MAX78000\AI85_FTDI_QSPI-develop\host\qspim\|
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v141:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=10.0.22000.0
+Release|Win32|C:\MAX78000_SDK-Afs-1\Examples\MAX78000\CNN\UNet-highres-demo-SPI\host\qspim\|

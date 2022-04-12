@@ -67,7 +67,7 @@
     <ProjectGuid>{C68577AC-5433-4B27-8C67-6F2C15973B35}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>max32520fthr</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LOOPBACK Debug|Win32'" Label="Configuration">
