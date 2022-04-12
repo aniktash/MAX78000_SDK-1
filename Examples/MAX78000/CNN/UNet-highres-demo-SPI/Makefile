@@ -75,18 +75,12 @@ LIBS_DIR=/$(subst \,/,$(subst :,,$(MAXIM_PATH))/Libraries)
 endif
 
 CMSIS_ROOT=$(LIBS_DIR)/CMSIS
-# SECURE_BOOT_TOOLS_DIR=$(LIBS_DIR)/../Tools/SBT
-# CA_SIGN_BUILD=$(SECURE_BOOT_TOOLS_DIR)/bin/sign_app
-# BUILD_SESSION=$(SECURE_BOOT_TOOLS_DIR)/bin/build_scp_session
-# TEST_KEY=$(SECURE_BOOT_TOOLS_DIR)/devices/$(TARGET_UC)/keys/maximtestcrk.key
-# SCP_PACKETS=scp_packets
 
 #Use this for other library make files so they are all based off the same as root as the project
 export CMSIS_ROOT
 
 # Source files for this test (add path to VPATH below)
 SRCS  = main.c
-#SRCS += sla_header.c
 SRCS += debug.h boardnew.c qspis.c cbuf.c timer.c cnn.c camera_util.c
 
 # Where to find source files for this test
@@ -98,13 +92,14 @@ IPATH = .
 
 # Enable assertion checking for development
 PROJ_CFLAGS+=-DMXC_ASSERT_ENABLE
-#, -DDEBUG_ENABLE
+#PROJ_CFLAGS+=-DDEBUG_ENABLE
 
 # Control program based on board
 #PROJ_CFLAGS+=-D$(BOARD)
 #PROJ_CFLAGS+=-D$(CAMERA)
 # Enable all warnings
 PROJ_CFLAGS+=-Wall 
+PROJ_CFLAGS+=-Wno-strict-aliasing
 #PROJ_CFLAGS+=-mcpu=cortex-m4 -mfloat-abi=softfp -mfpu=fpv4-sp-d16 -Xlinker --gc-sections -specs=nosys.specs -Xlinker -Xlinker -Xlinker --start-group -lc -lm -lnosys -Xlinker --end-group
 
 # Specify the target revision to override default
