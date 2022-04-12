@@ -49,8 +49,6 @@
 
 // To use camera, disable PATTERN_GEN in camera_util.h
 
-
-
 #define USE_SPI   // for testing to disble SPI
 
 #define DATA_BLOCK  64  // size of block of data block to transfer by qspi
@@ -243,7 +241,6 @@ int main( void )
 		 		LED_Toggle(LED1);
 
 		 		load_input_camera();
-		 		//MXC_Delay(50000);
 
 //		 		dump_cnn();
 
@@ -286,9 +283,6 @@ int main( void )
 		 				board_sleep();
 
 		 			}
-		 			//console_uart_send_bytes(data_addr, 4*NUM_PIXELS); //4x7744=30976
-		 			//frame size in bits: 3,964,928,  495,616 bytes
-		 			// data_addr += 0x8000;
 		 			//printf("1.  ch=%d,DAddr =0x%08x \n",ch, data_addr);
 		 			data_addr += 0x2000;
 		 			//printf("2.  ch=%d,DAddr =0x%08x \n",ch, data_addr);
@@ -296,7 +290,6 @@ int main( void )
 		 			   		(data_addr == (uint32_t *)0x50820000) ||
 		 					(data_addr == (uint32_t *)0x50c20000))
 		 			{
-		 			   //data_addr += 0x003e0000;
 		 			   	data_addr += 0x000F8000;
 		 			   	//printf("3a. ch=%d,DAddr =0x%08x \n",ch, data_addr);
 		 			}
@@ -335,9 +328,7 @@ int main( void )
 		 		LED_Toggle(LED1);
 
 		 		load_input_camera();
-		 		//MXC_Delay(50000);
-
-
+	
 		 		uint32_t * data_addr1[12] = { (uint32_t *) 0x50400700, (uint32_t *) 0x50408700, (uint32_t *) 0x50410700,  (uint32_t *) 0x50418700,
 		 									 (uint32_t *) 0x50800700, (uint32_t *) 0x50808700, (uint32_t *) 0x50810700,  (uint32_t *) 0x50818700,
 		 									 (uint32_t *) 0x50c00700, (uint32_t *) 0x50c08700, (uint32_t *) 0x50c10700,  (uint32_t *) 0x50c18700 };
@@ -369,16 +360,6 @@ int main( void )
 		 		} //for i
 
 		 		printf("SUM: %08X \n", sum);
-
-		 		// start inference
-//		 		cnn_start(); // Start CNN processing
-//
-//		 		SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk; // SLEEPDEEP=0
-//		 		while (cnn_time == 0)
-//		 			__WFI(); // Wait for CNN
-
-		 		// unloading inference
-				// dump_inference();
 
 #ifndef PATTERN_GEN
 		  //camera_sleep(0); // disable sleep

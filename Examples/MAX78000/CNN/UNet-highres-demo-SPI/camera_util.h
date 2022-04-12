@@ -74,13 +74,7 @@
 #define TFT_W	320
 #define TFT_H	240
 
-
 //#define PATTERN_GEN
-
-//#define IMAGE_XRES  352// 320
-//#define IMAGE_YRES  352//240
-
-#define STREAM_ENABLE
 
 void process_img(void);
 int initialize_camera(void);
