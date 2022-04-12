@@ -174,33 +174,6 @@ void __attribute__((interrupt("machine")))  DMA0_IRQHandler(void)
 static stream_stat_t statistic;
 static volatile uint32_t current_stream_buffer = 0;
 static uint8_t* stream_buffer_ptr = NULL;
-/*
-static void stream_callback(int a, int b)
-{
-    if (MXC_DMA->ch[g_dma_channel].status & MXC_F_DMA_STATUS_CTZ_IF) {
-        MXC_DMA->ch[g_dma_channel].status = MXC_F_DMA_STATUS_CTZ_IF; // Clear CTZ status flag
-
-        if (stream_buffer_ptr == NULL) {
-            stream_buffer_ptr = MXC_DMA->ch[g_dma_channel].dst;
-        }
-        else {
-            statistic.overflow_count++;
-        }
-
-        MXC_DMA->ch[g_dma_channel].dst = (uint32_t)(rx_data  + g_stream_buffer_size * current_stream_buffer);
-
-        // Alternate streaming buffers
-        current_stream_buffer ^= 1;
-
-        // Set DMA counter
-        MXC_DMA->ch[g_dma_channel].cnt = g_stream_buffer_size;
-        // Re-enable DMA channel
-        MXC_DMA->ch[g_dma_channel].ctrl += (0x1 << MXC_F_DMA_CTRL_EN_POS);
-
-        statistic.dma_transfer_count++;
-    }
-}
-*/
 
 static void stream_callback(int a, int b)
 {

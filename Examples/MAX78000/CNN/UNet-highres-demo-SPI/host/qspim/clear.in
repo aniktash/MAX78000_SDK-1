@@ -1,0 +1,1 @@
+This is the cleartext input file for crypto.sh.  crypto.sh calls qspm.exe to send this file to the MAX32520FTHR qspis firmware for encryption (AES256 CBC).  The encrypted data is then stored in crypt.bin which is, in turn, decrypted to clear.out.  crypto.bin and clear.out may be larger than clear.in as the input is zero-padded to 16 bytes. **********
