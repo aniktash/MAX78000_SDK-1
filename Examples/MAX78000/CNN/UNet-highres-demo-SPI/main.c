@@ -167,6 +167,7 @@ int main( void )
 
 	// stream data from the true random number generator peripheral
 	cnn_enable(MXC_S_GCR_PCLKDIV_CNNCLKSEL_PCLK, MXC_S_GCR_PCLKDIV_CNNCLKDIV_DIV1);
+	cnn_boost_enable(MXC_GPIO2, MXC_GPIO_PIN_5); // Turn on the boost circuit
 	//printf("\n*** CNN Inference Test ***\n");
 	cnn_init(); // Bring state machine into consistent state
 	cnn_load_weights(); // Load kernels
