@@ -508,8 +508,9 @@ static void displayInit(void)
         // delay after reset
         MXC_Delay(1000);
     }
-	///
-	printf("Display initilization ...\r\n");
+
+    printf("D\n");
+
     write_command(0x0028);    // VCOM OTP
     write_data(0x0006);       // Page 55-56 of SSD2119 datasheet
 
@@ -888,7 +889,8 @@ int MXC_TFT_Init(mxc_spi_regs_t* tft_spi, int ss_idx, mxc_gpio_cfg_t* reset_ctrl
     // Turn on backlight
     MXC_TFT_Backlight(1);
 
-	printf(" \n");
+    printf("D\n");
+
     return result;
 }
 

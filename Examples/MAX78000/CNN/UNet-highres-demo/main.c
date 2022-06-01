@@ -64,6 +64,11 @@ volatile uint32_t cnn_time; // Stopwatch
 #define NUM_PIXELS 7744 // 88x88
 #define NUM_IN_CHANNLES 48
 #define NUM_OUT_CHANNLES 64
+#define INFER_SIZE 30976	  // size of inference 64x88x88/16
+
+
+uint8_t cnn_out_packed[INFER_SIZE];
+uint8_t cnn_out_unfolded[INFER_SIZE];
 
 void fail(void)
 {
@@ -324,6 +329,268 @@ void send_output(void)
   }
 }
 
+void cnn_unload_packed(uint8_t *p_out)
+{
+uint8_t *data_addr = (uint8_t *) 0x50400000;
+uint8_t temp0 = 0 , temp1 = 0 ,temp2 = 0, temp3 = 0, temp4 = 0, a=0, b=0;
+uint32_t buf = 0;
+
+				  for (int j=0;j<16;j++) {
+					  for (int i=0;i<1936;i+=4) { //packing 2bits into one byte  352x88/16=30976/16=1936
+				//	printf("Channel: %d\n",ch);
+					//for(int pix=0; pix < 1*NUM_PIXELS; pix+=DATA_BLOCK)
+					//{
+						  buf = 0;
+
+						for (int n=0; n< 4; n++)
+						{
+							//0
+								int val = (i+n)*16;
+								a = ((*(data_addr+0+val))^0x80);
+								b = ((*(data_addr+1+val))^0x80);
+								if (a > b){
+									temp0 = a;
+									//temp1 = 3<<6;
+									temp1 = 3;
+								}
+								else {
+									temp0 = b;
+									//temp1 = 2<<6;
+									temp1 = 2;
+								}
+								a = ((*(data_addr+2+val))^0x80);
+
+								if (temp0 < a) {
+									temp0 = a;
+									//temp1 = 1<<6;
+									temp1 = 1;
+								}
+								a = ((*(data_addr+3+val))^0x80);
+								if (temp0 < a) {
+									temp1 = 0;
+								}
+							//1
+								a = ((*(data_addr+4+val))^0x80);
+								b = ((*(data_addr+5+val))^0x80);
+								if(a > b){
+									temp0 = a;
+									//temp2 = 3<<4;
+									temp2 = 3;
+								}
+								else {
+									temp0 = b;
+									//temp2 = 2<<4;
+									temp2 = 2;
+								}
+								a = ((*(data_addr+6+val))^0x80);
+								if (temp0 < a){
+									temp0 = a;
+									//temp2 = 1<<4;
+									temp2 = 1;
+								}
+								if (temp0 < ((*(data_addr+7+val))^0x80)){
+									//temp2 = 0<<4;
+									temp2 = 0;
+								}
+							 //2
+								a = ((*(data_addr+8+val))^0x80);
+								b = ((*(data_addr+9+val))^0x80);
+								if(a > b){
+									temp0 = a;
+									//temp3 = 3<<2;
+									temp3 = 3;
+								}
+								else {
+									temp0 = b;
+									//temp3 = 2<<2;
+									temp3 = 2;
+								}
+								a = ((*(data_addr+10+val))^0x80);
+								if (temp0 < a){
+									temp0 = a;
+									//temp3 = 1<<2;
+									temp3 = 1;
+								}
+								if (temp0 < ((*(data_addr+11+val))^0x80)){
+									//temp3 = 0<<2;
+									temp3 = 0;
+								}
+							 //3
+								a = ((*(data_addr+12+val))^0x80);
+								b = ((*(data_addr+13+val))^0x80);
+								if(a > b){
+									temp0 = a;
+									//temp4 = 3<<0;
+									temp4 = 3;
+								}
+								else {
+									temp0 = b;
+									//temp4 = 2<<0;
+									temp4 = 2;
+								}
+								a = ((*(data_addr+14+val))^0x80);
+								if(temp0 < a) {
+									temp0 = a;
+									//temp4 = 1<<0;
+									temp4 = 1;
+								}
+								if (temp0 < ((*(data_addr+15+val))^0x80)){
+									//temp4 = 0<<0;
+									temp4 = 0;
+								}
+								//buf = buf << 8;
+								//printf("%d:buffer0: %08x\n",n,buf);
+								//buf |= (temp1 + temp2 + temp3 + temp4);
+								buf |= ((((temp1<<6) + (temp2<<4) + (temp3<<2) + temp4)) << (8*n));
+								///// this is to reverse the order of bytes ///////////////////////
+								///// python script has to be changed from dtype uint32 to uint8 //
+								///// to revert, remove the 8xn and uncomment buf=buf<<8 //////////
+
+								// buf |= (((temp4<<6) + (temp3<<4) + (temp2<<2) + temp1)) << (24-8*n);
+								//printf("%d:buffer1: %08x\n",n,buf);
+								//console_uart_send_bytes(&buf, 1);
+							//*p_out++ = dummy_count++;
+							//*p_out++ = *(&buf+i+n); // putting data in buffer
+						//	*p_out++ = buf;
+						}
+						//printf("%08x",buf);
+						
+                        *p_out++ = buf;
+                    
+                    }
+					//console_uart_send_bytes(data_addr, 4*NUM_PIXELS); //4x7744=30976
+					//frame size in bits: 3,964,928,  495,616 bytes
+					data_addr += 0x8000;
+					//printf("\n");
+					//printf("1.  ch=%d,DAddr =0x%08x \n",ch, data_addr);
+					//data_addr += 0x2000;
+					//printf("2.  ch=%d,DAddr =0x%08x \n",ch, data_addr);
+					if (	(data_addr == (uint8_t *)0x50420000) ||
+							(data_addr == (uint8_t *)0x50820000) ||
+							(data_addr == (uint8_t *)0x50c20000)	)
+					{
+					   data_addr += 0x003e0000;
+						//printf("\n");
+						//data_addr += 0x000F8000;
+						//printf("3a. ch=%d,DAddr =0x%08x \n",ch, data_addr);
+					}
+					//printf("3.  ch=%d,DAddr =0x%08x \n",ch, data_addr);
+
+				}
+			//	printf("unloading finished\n");
+}
+
+void write_TFT_pixel(int row, int col, unsigned char value)
+{
+uint16_t rgb;
+uint8_t r,g,b;
+uint8_t data565[2];
+	
+    // Only display mask in TFT limits
+    if((col >= TFT_W) || (row >= TFT_H))
+        return;
+  
+    r = 0;
+    g = 0;
+    b = 0;
+  
+    //set mask color
+    if(value == 1)
+       g = 255;  // Green
+    else if (value == 2)
+       b = 255;  // Blue
+    else if (value == 3)
+       r = 255;  // Red
+
+	// Convert to RGB565
+    rgb = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | (b >> 3);
+	data565[0] = (rgb >> 8) & 0xFF;
+	data565[1] = rgb & 0xFF;
+
+	// Write one RGB565 pixel
+    MXC_TFT_ShowImageCameraRGB565(col, row, data565, 1, 1);
+}
+
+void TFT_test(unsigned char value)
+{
+    for (int r = 0; r < TFT_H; r++)
+    {
+        //value++;
+        for (int c = 0; c < TFT_W; c++)
+            write_TFT_pixel(r, c, value);
+            
+        //value %= 3;
+    }
+}
+
+void unfold_display_packed(unsigned char* in_buff, unsigned char* out_buff)
+{
+int index = 0;
+unsigned char temp[4];
+
+	for (int r = 0; r < 88; r++)
+    {
+		for (int c = 0; c < 16; c++)
+		{
+			int idx = 22 * r + 88 *22 * c;
+			for (int d = 0; d < 22; d ++)
+			{
+				out_buff[index + d] = in_buff[idx + d];
+			}
+			index += 22;
+		}
+    }
+
+	for (int s1 = 0; s1 < 352; s1++)
+    {
+		for (int s2 = 0; s2 < 22; s2++)
+		{
+			temp[0] = out_buff[s1 * 88 + s2 + 00];
+			temp[1] = out_buff[s1 * 88 + s2 + 22];
+			temp[2] = out_buff[s1 * 88 + s2 + 44];
+			temp[3] = out_buff[s1 * 88 + s2 + 66];
+
+			// bit manipulations to place each 2 bits into a byte
+			//unfolded_inp1[s1][0 + 16 * s2] = (temp[0] & 0xc0) >> 6;
+            write_TFT_pixel(s1, (0 + 16 * s2), (temp[0] & 0xc0) >> 6);
+			//unfolded_inp1[s1][1 + 16 * s2] = (temp[1] & 0xc0) >> 6;
+            write_TFT_pixel(s1, (1 + 16 * s2), (temp[1] & 0xc0) >> 6);
+			//unfolded_inp1[s1][2 + 16 * s2] = (temp[2] & 0xc0) >> 6;
+            write_TFT_pixel(s1, (2 + 16 * s2), (temp[2] & 0xc0) >> 6);
+			//unfolded_inp1[s1][3 + 16 * s2] = (temp[3] & 0xc0) >> 6;
+            write_TFT_pixel(s1, (3 + 16 * s2), (temp[3] & 0xc0) >> 6);
+
+			//unfolded_inp1[s1][4 + 16 * s2] = (temp[0] & 0x30) >> 4;
+            write_TFT_pixel(s1, (4 + 16 * s2), (temp[0] & 0x30) >> 4);
+			//unfolded_inp1[s1][5 + 16 * s2] = (temp[1] & 0x30) >> 4;
+            write_TFT_pixel(s1, (5 + 16 * s2), (temp[1] & 0x30) >> 4);
+			//unfolded_inp1[s1][6 + 16 * s2] = (temp[2] & 0x30) >> 4;
+            write_TFT_pixel(s1, (6 + 16 * s2), (temp[2] & 0x30) >> 4);
+			//unfolded_inp1[s1][7 + 16 * s2] = (temp[3] & 0x30) >> 4;
+            write_TFT_pixel(s1, (7 + 16 * s2), (temp[3] & 0x30) >> 4);
+
+			//unfolded_inp1[s1][8 + 16 * s2] = (temp[0] & 0x0c) >> 2;
+            write_TFT_pixel(s1, (8 + 16 * s2), (temp[0] & 0x0c) >> 2);
+			//unfolded_inp1[s1][9 + 16 * s2] = (temp[1] & 0x0c) >> 2;
+            write_TFT_pixel(s1, (9 + 16 * s2), (temp[1] & 0x0c) >> 2);
+			//unfolded_inp1[s1][10 + 16 * s2] = (temp[2] & 0x0c) >> 2;
+            write_TFT_pixel(s1, (10 + 16 * s2), (temp[2] & 0x0c) >> 2);
+			//unfolded_inp1[s1][11 + 16 * s2] = (temp[3] & 0x0c) >> 2;
+            write_TFT_pixel(s1, (11 + 16 * s2), (temp[3] & 0x0c) >> 2);
+
+			//unfolded_inp1[s1][12 + 16 * s2] = (temp[0] & 0x03) >> 0;
+            write_TFT_pixel(s1, (12 + 16 * s2), (temp[0] & 0x03) >> 0);
+			//unfolded_inp1[s1][13 + 16 * s2] = (temp[1] & 0x03) >> 0;
+            write_TFT_pixel(s1, (13 + 16 * s2), (temp[1] & 0x03) >> 0);
+			//unfolded_inp1[s1][14 + 16 * s2] = (temp[2] & 0x03) >> 0;
+            write_TFT_pixel(s1, (14 + 16 * s2), (temp[2] & 0x03) >> 0);
+			//unfolded_inp1[s1][15 + 16 * s2] = (temp[3] & 0x03) >> 0;
+            write_TFT_pixel(s1, (15 + 16 * s2), (temp[3] & 0x03) >> 0);
+		}
+    }
+
+}
+
 int main(void)
 {
 
@@ -360,7 +627,6 @@ int main(void)
 
 #endif
 
-
   // DO NOT DELETE THIS LINE:
   //MXC_Delay(SEC(2)); // Let debugger interrupt if needed
 
@@ -381,7 +647,6 @@ int main(void)
   printf("Start capturing\n");
   camera_start_capture_image();
 #endif
-
 
   while (1)
   {
@@ -407,7 +672,9 @@ int main(void)
 		  cnn_start(); // Start CNN processing
 
 #ifdef USE_CAMERA
+          printf("Display image\n");
 		  display_camera();
+          MXC_Delay(SEC(1));
 #endif
 
 		  SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk; // SLEEPDEEP=0
@@ -418,6 +685,15 @@ int main(void)
 		  /// unload
 		  //dump_inference();
 		  //send_output();
+        
+          //TFT_test(1);
+          //while(1);
+          
+          printf("Display mask\n"); 
+          cnn_unload_packed(cnn_out_packed);
+          unfold_display_packed(cnn_out_packed, cnn_out_unfolded);
+          MXC_Delay(SEC(1));
+          
 #ifdef USE_CAMERA
 		  camera_sleep(0); // disable sleep
 		  camera_start_capture_image();
