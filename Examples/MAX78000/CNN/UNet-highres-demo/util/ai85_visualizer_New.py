@@ -15,7 +15,7 @@ from utils_fast_New import *
 # In[10]:
 
 
-ser = serial.Serial('COM54')
+ser = serial.Serial('COM52')
 ser.baudrate = 2*115200
 ser.timeout = 0.001
 
@@ -49,7 +49,8 @@ img_resize = np.asarray(im_resize)[:, :, :3]
 #plt.show()
 
 # set to True for testing pattern
-if False:
+#if False:
+if True:
     img_resize1=np.ndarray(shape=(352,352,3), dtype=np.uint8)
     for i in range(352):
         for j in range(352):

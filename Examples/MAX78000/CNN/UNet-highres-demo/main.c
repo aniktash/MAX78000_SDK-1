@@ -44,12 +44,8 @@
 
 #include "led.h"
 #include "camera.h"
-//#include "sampledata.h"
-//#include "sampleoutput.h"
-
 
 #define USE_CAMERA   // if enabled, it uses the camera specified in the make file, otherwise it uses serial loader
-
 
 //------------------------------------------------------------
 #if 1//def USE_CAMERA
@@ -66,8 +62,7 @@ volatile uint32_t cnn_time; // Stopwatch
 #define NUM_OUT_CHANNLES 64
 #define INFER_SIZE 30976	  // size of inference 64x88x88/16
 
-
-uint8_t cnn_out_packed[INFER_SIZE];
+uint32_t cnn_out_packed[INFER_SIZE/4];
 uint8_t cnn_out_unfolded[INFER_SIZE];
 
 void fail(void)
@@ -329,7 +324,7 @@ void send_output(void)
   }
 }
 
-void cnn_unload_packed(uint8_t *p_out)
+void cnn_unload_packed(uint32_t *p_out)
 {
 uint8_t *data_addr = (uint8_t *) 0x50400000;
 uint8_t temp0 = 0 , temp1 = 0 ,temp2 = 0, temp3 = 0, temp4 = 0, a=0, b=0;
@@ -337,11 +332,7 @@ uint32_t buf = 0;
 
 				  for (int j=0;j<16;j++) {
 					  for (int i=0;i<1936;i+=4) { //packing 2bits into one byte  352x88/16=30976/16=1936
-				//	printf("Channel: %d\n",ch);
-					//for(int pix=0; pix < 1*NUM_PIXELS; pix+=DATA_BLOCK)
-					//{
-						  buf = 0;
-
+						buf = 0;
 						for (int n=0; n< 4; n++)
 						{
 							//0
@@ -441,13 +432,14 @@ uint32_t buf = 0;
 								//buf = buf << 8;
 								//printf("%d:buffer0: %08x\n",n,buf);
 								//buf |= (temp1 + temp2 + temp3 + temp4);
-								buf |= ((((temp1<<6) + (temp2<<4) + (temp3<<2) + temp4)) << (8*n));
-								///// this is to reverse the order of bytes ///////////////////////
+						        buf |= ((((temp1<<6) + (temp2<<4) + (temp3<<2) + temp4)) << (8*n));
+                                
+                                ///// this is to reverse the order of bytes ///////////////////////
 								///// python script has to be changed from dtype uint32 to uint8 //
 								///// to revert, remove the 8xn and uncomment buf=buf<<8 //////////
-
-								// buf |= (((temp4<<6) + (temp3<<4) + (temp2<<2) + temp1)) << (24-8*n);
-								//printf("%d:buffer1: %08x\n",n,buf);
+								//buf |= (((temp4<<6) + (temp3<<4) + (temp2<<2) + temp1)) << (24-8*n);
+                                
+                                //printf("%d:buffer1: %08x\n",n,buf);
 								//console_uart_send_bytes(&buf, 1);
 							//*p_out++ = dummy_count++;
 							//*p_out++ = *(&buf+i+n); // putting data in buffer
@@ -551,40 +543,24 @@ unsigned char temp[4];
 			temp[3] = out_buff[s1 * 88 + s2 + 66];
 
 			// bit manipulations to place each 2 bits into a byte
-			//unfolded_inp1[s1][0 + 16 * s2] = (temp[0] & 0xc0) >> 6;
             write_TFT_pixel(s1, (0 + 16 * s2), (temp[0] & 0xc0) >> 6);
-			//unfolded_inp1[s1][1 + 16 * s2] = (temp[1] & 0xc0) >> 6;
             write_TFT_pixel(s1, (1 + 16 * s2), (temp[1] & 0xc0) >> 6);
-			//unfolded_inp1[s1][2 + 16 * s2] = (temp[2] & 0xc0) >> 6;
             write_TFT_pixel(s1, (2 + 16 * s2), (temp[2] & 0xc0) >> 6);
-			//unfolded_inp1[s1][3 + 16 * s2] = (temp[3] & 0xc0) >> 6;
             write_TFT_pixel(s1, (3 + 16 * s2), (temp[3] & 0xc0) >> 6);
 
-			//unfolded_inp1[s1][4 + 16 * s2] = (temp[0] & 0x30) >> 4;
             write_TFT_pixel(s1, (4 + 16 * s2), (temp[0] & 0x30) >> 4);
-			//unfolded_inp1[s1][5 + 16 * s2] = (temp[1] & 0x30) >> 4;
             write_TFT_pixel(s1, (5 + 16 * s2), (temp[1] & 0x30) >> 4);
-			//unfolded_inp1[s1][6 + 16 * s2] = (temp[2] & 0x30) >> 4;
             write_TFT_pixel(s1, (6 + 16 * s2), (temp[2] & 0x30) >> 4);
-			//unfolded_inp1[s1][7 + 16 * s2] = (temp[3] & 0x30) >> 4;
             write_TFT_pixel(s1, (7 + 16 * s2), (temp[3] & 0x30) >> 4);
 
-			//unfolded_inp1[s1][8 + 16 * s2] = (temp[0] & 0x0c) >> 2;
             write_TFT_pixel(s1, (8 + 16 * s2), (temp[0] & 0x0c) >> 2);
-			//unfolded_inp1[s1][9 + 16 * s2] = (temp[1] & 0x0c) >> 2;
             write_TFT_pixel(s1, (9 + 16 * s2), (temp[1] & 0x0c) >> 2);
-			//unfolded_inp1[s1][10 + 16 * s2] = (temp[2] & 0x0c) >> 2;
             write_TFT_pixel(s1, (10 + 16 * s2), (temp[2] & 0x0c) >> 2);
-			//unfolded_inp1[s1][11 + 16 * s2] = (temp[3] & 0x0c) >> 2;
             write_TFT_pixel(s1, (11 + 16 * s2), (temp[3] & 0x0c) >> 2);
 
-			//unfolded_inp1[s1][12 + 16 * s2] = (temp[0] & 0x03) >> 0;
             write_TFT_pixel(s1, (12 + 16 * s2), (temp[0] & 0x03) >> 0);
-			//unfolded_inp1[s1][13 + 16 * s2] = (temp[1] & 0x03) >> 0;
             write_TFT_pixel(s1, (13 + 16 * s2), (temp[1] & 0x03) >> 0);
-			//unfolded_inp1[s1][14 + 16 * s2] = (temp[2] & 0x03) >> 0;
             write_TFT_pixel(s1, (14 + 16 * s2), (temp[2] & 0x03) >> 0);
-			//unfolded_inp1[s1][15 + 16 * s2] = (temp[3] & 0x03) >> 0;
             write_TFT_pixel(s1, (15 + 16 * s2), (temp[3] & 0x03) >> 0);
 		}
     }
@@ -624,7 +600,6 @@ int main(void)
 
     /* Set the screen rotation */
    // MXC_TFT_SetRotation(SCREEN_FLIP);
-
 #endif
 
   // DO NOT DELETE THIS LINE:
@@ -663,10 +638,8 @@ int main(void)
 		 //dump_cnn();
 #endif
 
-
 		// start inference
 #ifdef USE_CAMERA
-		  camera_sleep(0); // disable sleep
 		  camera_start_capture_image(); // next frame
 #endif
 		  cnn_start(); // Start CNN processing
@@ -684,18 +657,17 @@ int main(void)
 
 		  /// unload
 		  //dump_inference();
-		  //send_output();
+		  //send_output(); // send CNN output to UART
         
           //TFT_test(1);
           //while(1);
           
           printf("Display mask\n"); 
           cnn_unload_packed(cnn_out_packed);
-          unfold_display_packed(cnn_out_packed, cnn_out_unfolded);
+          unfold_display_packed((unsigned char*)cnn_out_packed, cnn_out_unfolded);
           MXC_Delay(SEC(1));
           
 #ifdef USE_CAMERA
-		  camera_sleep(0); // disable sleep
 		  camera_start_capture_image();
 #endif
 		  if (PB_Get(0))

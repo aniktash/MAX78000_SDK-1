@@ -422,7 +422,6 @@ void load_input_camera(void)
 		   // Release stream buffer
 		   release_camera_stream_buffer();
     }
-    //camera_sleep(1);
     stat = get_camera_stream_statistic();
 
     //printf("DMA transfer count = %d\n", stat->dma_transfer_count);
@@ -511,7 +510,6 @@ void display_camera(void)
     cnt--;
     if (cnt == -1)
     		cnt=DIV-1;
-    //camera_sleep(1);
     stat = get_camera_stream_statistic();
 
     //printf("DMA transfer count = %d\n", stat->dma_transfer_count);
